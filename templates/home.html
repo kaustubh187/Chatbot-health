@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot App</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Bebas+Neue&family=Instrument+Serif:ital@1&family=Kanit:wght@600&family=Koulen&family=Merriweather:ital,wght@1,400;1,900&family=Montserrat&family=Noto+Serif&family=Open+Sans:ital,wght@1,800&family=Playfair+Display:ital,wght@1,700&family=Spectral:wght@600&display=swap');
+    .contain{
+        margin: auto;
+        background-color: rgba(188, 188, 188, 0.673);
+        width: 50%;
+        text-align: center;
+        border: 2px rgba(128, 128, 128, 0.641) solid;
+        height: 99%;
+        border-radius: 24px;
+        line-height: 42px;
+    }
+    #chatbox {
+        background-color: #f0f0f0a3;
+        text-align: left;
+      width: 90%;
+      height: 600px;
+      border: 1px solid #ccc;
+      overflow-y: scroll;
+      padding: 10px;
+      font-size: 1.2vw;
+      margin-left: 14px;
+      border-radius: 20px;
+    }
+    #input-box {
+    font-family: 'Montserrat',sans-serif;
+      width: 49%;
+      border-radius: 10px;
+      margin-top: 20px;
+      height: 50px;
+      font-size: 1.3vw;
+      text-align: center;
+      margin-bottom: 18px;
+      word-wrap: break-word;
+    }
+    .user {
+        font-family: 'Montserrat',sans-serif;
+    text-align: right;
+    background-color: #F0F0F0;
+    color: #333;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    margin-right: 2px;
+    word-wrap: break-word;
+  }
+
+  .bot {
+    font-family: 'Montserrat',sans-serif;
+    background-color: #E6F3FF;
+    color: #333;
+    text-align: left;
+    word-wrap: break-word;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 5px;
+  }
+  </style>
+</head>
+<body style="background-image: url(https://images.unsplash.com/photo-1576628989930-9f5bb06f00a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80);background-size: cover;">
+    <div class="contain">
+        <h1 style="font-family: 'Montserrat',sans-serif;">Ask Queries</h1>
+        <div id="chatbox"></div>
+        <input type="text" id="input-box" placeholder="  Type your message  " autofocus>
+
+    </div>
+  
+  <script>
+    var chatbox = document.getElementById("chatbox");
+    var inputBox = document.getElementById("input-box");
+
+    function addMessage(message, isUser) {
+      var className = isUser ? "user" : "bot";
+      var alignment = isUser ? "right" : "left";
+      var div = document.createElement("div");
+      div.className = className;
+      div.classList.add(alignment);
+      div.textContent = message;
+      chatbox.appendChild(div);
+    }
+    function speakMessage(message) {
+    var speech = new SpeechSynthesisUtterance();
+    speech.text = message;
+    speech.volume = 1;
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.lang = "en-US";
+    speechSynthesis.speak(speech);
+  }
+    function processInput() {
+        var userInput = inputBox.value;
+      addMessage(userInput, true);
+      inputBox.value = "";
+
+      // Make an HTTP request to the Flask server
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: userInput })
+      })
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        var botResponse = data.response;
+        addMessage(botResponse, false);
+        speakMessage(botResponse);
+      })
+      .catch(function(error) {
+        console.log('Error:', error);
+      });
+    }
+
+    inputBox.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+        processInput();
+      }
+    });
+  </script>
+</body>
+</html>
